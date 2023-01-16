@@ -11,7 +11,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GPSTracking.Api.Search", "G
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GPSTracking.Api.GPSTrackings", "GPSTracking.Api.GPSTrackings\GPSTracking.Api.GPSTrackings.csproj", "{C293A0C7-6CAD-4972-B9B6-9044C1AB4D97}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GPSTracking.Api.GPSTrackings.Tests", "GPSTracking.Api.GPSTrackings.Tests\GPSTracking.Api.GPSTrackings.Tests.csproj", "{6ABEEBC7-BE8B-4587-8AC2-8BE4910F5471}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GPSTracking.Api.GPSTrackings.Tests", "GPSTracking.Api.GPSTrackings.Tests\GPSTracking.Api.GPSTrackings.Tests.csproj", "{6ABEEBC7-BE8B-4587-8AC2-8BE4910F5471}"
+EndProject
+Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{9EBA68EC-25B1-48BC-86AF-1882A69631AE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{6ABEEBC7-BE8B-4587-8AC2-8BE4910F5471}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6ABEEBC7-BE8B-4587-8AC2-8BE4910F5471}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6ABEEBC7-BE8B-4587-8AC2-8BE4910F5471}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9EBA68EC-25B1-48BC-86AF-1882A69631AE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9EBA68EC-25B1-48BC-86AF-1882A69631AE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9EBA68EC-25B1-48BC-86AF-1882A69631AE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9EBA68EC-25B1-48BC-86AF-1882A69631AE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

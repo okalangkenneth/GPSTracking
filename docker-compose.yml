@@ -1,0 +1,29 @@
+version: '3.4'
+
+services:
+  gpstracking.api.drivers:
+    image: ${DOCKER_REGISTRY-}gpstrackingapidrivers
+    build:
+      context: .
+      dockerfile: GPSTracking.Api.Drivers\Dockerfile
+
+  gpstracking.api.gpstrackings:
+    image: ${DOCKER_REGISTRY-}gpstrackingapigpstrackings
+    build:
+      context: .
+      dockerfile: GPSTracking.Api.GPSTrackings\Dockerfile
+
+
+  gpstracking.api.notifications:
+    image: ${DOCKER_REGISTRY-}gpstrackingapinotifications
+    build:
+      context: .
+      dockerfile: GPSTracking.Api.Payments\Dockerfile
+
+
+  gpstracking.api.search:
+    image: ${DOCKER_REGISTRY-}gpstrackingapisearch
+    build:
+      context: .
+      dockerfile: GPSTracking.Api.Search\Dockerfile
+
