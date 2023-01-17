@@ -23,7 +23,7 @@ namespace GPSTracking.Api.GPSTrackings.Controllers
         [HttpGet]
         public async Task<IActionResult> GetGPSTrackingsAsync()
         {
-            var result = await gPSTrackingsProvider.GetGPSTruckingsAsync();
+            var result = await gPSTrackingsProvider.GetGPSTrackingsAsync();
             if (result.IsSuccess)
             {
                 return Ok(result.GPSTrackings);
@@ -33,7 +33,7 @@ namespace GPSTracking.Api.GPSTrackings.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetGPSTrackingAsync(int id)
         {
-            var result = await gPSTrackingsProvider.GetGPSTruckingAsync(id);
+            var result = await gPSTrackingsProvider.GetGPSTrackingAsync(id);
             if (result.IsSuccess)
             {
                 return Ok(result.GPSTracking);

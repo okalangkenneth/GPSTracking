@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace GPSTracking.Api.GPSTrackings.GPSTrackingProfile
+namespace GPSTracking.Api.GPSTrackings.Profiles
 {
-    public class GPSTracking : AutoMapper.Profile
+    public class GPSTrackingProfile : AutoMapper.Profile
     {
-        public GPSTracking()
+        public GPSTrackingProfile()
         {
             CreateMap<Db.GPSTrackingV, Models.GPSTrackingV>();
         }

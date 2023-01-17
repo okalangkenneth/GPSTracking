@@ -20,25 +20,25 @@ namespace GPSTracking.Api.Notifications.Controllers
 
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetNotificationsAsync()
+        [HttpGet("{driverId}")]
+        public async Task<IActionResult> GetNotificationsAsync(int driverId)
         {
-            var result = await notificationsProvider.GetNotificationsAsync();
+            var result = await notificationsProvider.GetNotificationsAsync(driverId);
             if (result.IsSuccess)
             {
                 return Ok(result.Notifications);
             }
             return NotFound();
         }
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetNotificationAsync(int id)
-        {
-            var result = await notificationsProvider.GetNotificationAsync(id);
-            if (result.IsSuccess)
-            {
-                return Ok(result.Notification);
-            }
-            return NotFound();
-        }
+        //[HttpGet("{id}")]
+        //public async Task<IActionResult> GetNotificationAsync(int id)
+        //{
+        //    var result = await notificationsProvider.GetNotificationAsync(id);
+        //    if (result.IsSuccess)
+        //    {
+        //        return Ok(result.Notification);
+        //    }
+        //    return NotFound();
+        //}
     }
 }

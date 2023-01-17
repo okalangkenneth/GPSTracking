@@ -39,7 +39,7 @@ namespace GPSTracking.Api.GPSTrackings.Providers
         }
 
         public async Task<(bool IsSuccess, IEnumerable<Models.GPSTrackingV> GPSTrackings,
-            string ErrorMessage)> GetGPSTruckingsAsync()
+            string ErrorMessage)> GetGPSTrackingsAsync()
         {
             try
             {
@@ -59,7 +59,7 @@ namespace GPSTracking.Api.GPSTrackings.Providers
             }
         }
 
-        public async Task<(bool IsSuccess, Models.GPSTrackingV GPSTracking, string ErrorMessage)> GetGPSTruckingAsync(int id)
+        public async Task<(bool IsSuccess, Models.GPSTrackingV GPSTracking, string ErrorMessage)> GetGPSTrackingAsync(int id)
         {
             try
             {

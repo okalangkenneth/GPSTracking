@@ -8,7 +8,7 @@ namespace GPSTracking.Api.GPSTrackings.Interfaces
 {
     public interface IGPSTrackingsProvider
     {
-        Task<(bool IsSuccess, IEnumerable<GPSTrackingV> GPSTrackings, string ErrorMessage)> GetGPSTruckingsAsync();
-        Task<(bool IsSuccess, GPSTrackingV GPSTracking, string ErrorMessage)> GetGPSTruckingAsync(int id);
+        Task<(bool IsSuccess, IEnumerable<GPSTrackingV> GPSTrackings, string ErrorMessage)> GetGPSTrackingsAsync();
+        Task<(bool IsSuccess, GPSTrackingV GPSTracking, string ErrorMessage)> GetGPSTrackingAsync(int id);
     }
 }

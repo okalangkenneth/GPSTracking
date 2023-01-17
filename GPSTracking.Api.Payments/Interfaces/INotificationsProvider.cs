@@ -8,7 +8,7 @@ namespace GPSTracking.Api.Notifications.Interfaces
     public interface INotificationsProvider
     {
 
-        Task<(bool IsSuccess, IEnumerable<Models.Notification> Notifications, string ErrorMessage)> GetNotificationsAsync();
-        Task<(bool IsSuccess, Models.Notification Notification, string ErrorMessage)> GetNotificationAsync(int id);
+        Task<(bool IsSuccess, IEnumerable<Models.Notification> Notifications, string ErrorMessage)> GetNotificationsAsync(int driverId);
+        //Task<(bool IsSuccess, Models.Notification Notification, string ErrorMessage)> GetNotificationAsync(int id);
     }
 }

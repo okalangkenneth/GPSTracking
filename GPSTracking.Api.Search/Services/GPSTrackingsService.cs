@@ -11,9 +11,6 @@ using System.Threading.Tasks;
 namespace GPSTracking.Api.Search.Services
 {
 
-
-
-
     public class GPSTrackingsService : IGPSTrackingsService
     {
         private readonly IHttpClientFactory httpClientFactory;

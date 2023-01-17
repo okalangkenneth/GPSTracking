@@ -1,4 +1,5 @@
 ﻿using GPSTracking.Api.Search.Interfaces;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace GPSTracking.Api.Search.Services
@@ -9,11 +10,13 @@ namespace GPSTracking.Api.Search.Services
         private readonly IDriversService driversService;
         private readonly IGPSTrackingsService gPSTrackingsService;
 
-        public SearchService(INotificationsService notificationsService,IGPSTrackingsService gPSTrakingsService, IDriversService driversService)
+        public SearchService(INotificationsService notificationsService,
+            IGPSTrackingsService gPSTrakingsService, IDriversService driversService)
         {
             this.notificationsService = notificationsService;
-            this.driversService = driversService;
             this.gPSTrackingsService = gPSTrackingsService;
+            this.driversService = driversService;
+            
         }
 
 
@@ -24,10 +27,17 @@ namespace GPSTracking.Api.Search.Services
             var gPSTrackingResult = await gPSTrackingsService.GetGPSTrackingsAsync();
 
             if (notificationsResult.IsSuccess )
-{
+            { 
+
                 foreach (var notifications in notificationsResult.Notifications)
                 {
-                   // notification.GPSTracking = gPSTrackingResult.GPSTrackings.FirstOrDefault(p => p.Id == notification.GPSTrackingId)?.Vehicle;
+                    foreach (var notification in notifications.Notifications)
+                    {
+                        notification.Name = gPSTrackingResult.IsSuccess ?
+                           gPSTrackingResult.GPSTrackings.FirstOrDefault(p => p.Id == notification.GPSTrackingId)?.Vehicle :
+                           "GPSTracking information is not available";
+                    }
+
                 }
 
                 var result = new

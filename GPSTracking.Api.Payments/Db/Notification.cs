@@ -8,7 +8,8 @@ namespace GPSTracking.Api.Notifications.Db
     public class Notification
     {
         public int Id { get; set; }
-        public string Type { get; set; }
+        public int DriverId { get; set; }
+        public int Type { get; set; }
         public string Message { get; set; }
         public string Recipient { get; set; }
         public DateTime CreatedDate { get; set; }
@@ -16,6 +17,6 @@ namespace GPSTracking.Api.Notifications.Db
         public bool IsRead { get; set; }
         public int GPSTrackingId { get; set; }
         public bool IsActive { get; set; }
-
+        public List<NotificationType> Notifications { get; set; }
     }
 }

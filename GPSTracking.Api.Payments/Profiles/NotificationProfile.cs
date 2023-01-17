@@ -10,6 +10,7 @@ namespace GPSTracking.Api.Notifications.Profiles
         public NotificationProfile()
         {
             CreateMap<Db.Notification, Models.Notification>();
+            CreateMap<Db.NotificationType, Models.NotificationType>();
         }
     }
 }
