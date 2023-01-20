@@ -3,8 +3,7 @@
     "windowsAuthentication": false,
     "anonymousAuthentication": true,
     "iisExpress": {
-      "applicationUrl": "http://localhost:51378",
-      "sslPort": 0
+      "applicationUrl": "http://localhost:51378"      
     }
   },
   "$schema": "http://json.schemastore.org/launchsettings.json",
@@ -25,12 +24,12 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "applicationUrl": "http://localhost:5000"
-    },
-    "Docker": {
-      "commandName": "Docker",
-      "launchBrowser": true,
-      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/api/notifications",
-      "publishAllPorts": true
     }
+    //"Docker": {
+    //  "commandName": "Docker",
+    //  "launchBrowser": true,
+    //  "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/api/notifications",
+    //  "publishAllPorts": true
+    //}
   }
 }

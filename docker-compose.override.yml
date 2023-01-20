@@ -1,29 +1,15 @@
 version: '3.4'
 
 services:
-  gpstracking.api.drivers:
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-    ports:
-      - "6002:80"
-
   gpstracking.api.gpstrackings:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
     ports:
-      - "6001:80"
+      - "80"
 
-
-  gpstracking.api.notifications:
+  gpstracking.api.drivers:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
     ports:
-      - "6003:80"
-
-
-  gpstracking.api.search:
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-    ports:
-      - "6004:80"
+      - "80"
 

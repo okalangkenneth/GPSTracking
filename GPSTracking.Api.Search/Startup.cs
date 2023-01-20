@@ -31,7 +31,6 @@ namespace GPSTracking.Api.Search
             services.AddScoped<INotificationsService, NotificationsService>();
             services.AddScoped<IDriversService, DriversService>();
             services.AddScoped<IGPSTrackingsService, GPSTrackingsService>();
-
             services.AddHttpClient("NotificationsService", config =>
             {
                 config.BaseAddress = new Uri(Configuration["Services:Notifications"]) ;
