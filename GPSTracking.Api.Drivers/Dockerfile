@@ -12,7 +12,7 @@ WORKDIR /src
 COPY ["GPSTracking.Api.Drivers/GPSTracking.Api.Drivers.csproj", "GPSTracking.Api.Drivers/"]
 RUN dotnet restore "GPSTracking.Api.Drivers/GPSTracking.Api.Drivers.csproj"
 COPY . .
-WORKDIR "/src/GPSTracking.Api.Drivers"
+WORKDIR "/src/GPSTracking.Api.Drives"
 RUN dotnet build "GPSTracking.Api.Drivers.csproj" -c Release -o /app/build
 
 FROM build AS publish
