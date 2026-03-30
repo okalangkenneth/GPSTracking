@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GPS Fleet Tracking — Live Demo</title>
+
+  <!-- Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #0f172a;
+      --panel:    #1e293b;
+      --panel2:   #273549;
+      --border:   #334155;
+      --accent:   #3b82f6;
+      --accent2:  #60a5fa;
+      --text:     #e2e8f0;
+      --muted:    #94a3b8;
+      --success:  #22c55e;
+      --warning:  #f59e0b;
+      --danger:   #ef4444;
+      --red:      #ef4444;
+      --blue:     #3b82f6;
+      --green:    #22c55e;
+      --orange:   #f97316;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ── HEADER ── */
+    header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0 20px;
+      height: 54px;
+      background: var(--panel);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+      z-index: 1000;
+    }
+    header h1 {
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      color: var(--text);
+    }
+    header h1 span { color: var(--accent2); }
+
+    .badge {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      padding: 3px 8px;
+      border-radius: 4px;
+      text-transform: uppercase;
+    }
+    .badge-sim  { background: #7c3aed22; color: #a78bfa; border: 1px solid #7c3aed55; }
+    .badge-live { background: #16a34a22; color: #4ade80; border: 1px solid #16a34a55; }
+
+    .header-spacer { flex: 1; }
+
+    .pulse-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--success);
+      animation: pulse 2s infinite;
+      flex-shrink: 0;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: 0.5; transform: scale(0.85); }
+    }
+
+    .icon-btn {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      border-radius: 6px;
+      width: 34px; height: 34px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      transition: all 0.15s;
+      text-decoration: none;
+    }
+    .icon-btn:hover { border-color: var(--accent); color: var(--accent2); background: #1e3a5f33; }
+
+    /* ── MAIN LAYOUT ── */
+    .main {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: 300px;
+      background: var(--panel);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      flex-shrink: 0;
+    }
+    .sidebar::-webkit-scrollbar { width: 4px; }
+    .sidebar::-webkit-scrollbar-track { background: transparent; }
+    .sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    .section {
+      padding: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .section-title {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .section-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* Fleet cards */
+    .vehicle-card {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      background: var(--panel2);
+      border-radius: 8px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.15s;
+    }
+    .vehicle-card:last-child { margin-bottom: 0; }
+    .vehicle-card:hover { border-color: var(--border); }
+    .vehicle-card.active { border-color: var(--accent); background: #1e3a5f55; }
+
+    .v-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .v-info { flex: 1; min-width: 0; }
+    .v-name { font-size: 13px; font-weight: 600; }
+    .v-coords { font-size: 10px; color: var(--muted); margin-top: 1px; font-family: monospace; }
+    .v-speed {
+      font-size: 12px;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      min-width: 44px;
+      text-align: right;
+    }
+    .status-badge {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      padding: 2px 6px;
+      border-radius: 3px;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .status-moving  { background: #16a34a22; color: #4ade80; border: 1px solid #16a34a55; }
+    .status-stopped { background: #71717a22; color: #a1a1aa; border: 1px solid #52525b55; }
+
+    /* Driver rows */
+    .driver-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .driver-row:last-child { border-bottom: none; }
+    .driver-avatar {
+      width: 30px; height: 30px;
+      border-radius: 50%;
+      background: var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .driver-name { font-size: 13px; font-weight: 600; }
+    .driver-lic  { font-size: 10px; color: var(--muted); margin-top: 1px; }
+    .driver-vehicle { margin-left: auto; font-size: 10px; color: var(--muted); }
+
+    /* Alert rows */
+    .alert-row {
+      display: flex;
+      gap: 10px;
+      padding: 10px 12px;
+      background: var(--panel2);
+      border-radius: 8px;
+      margin-bottom: 8px;
+      border-left: 3px solid;
+    }
+    .alert-row:last-child { margin-bottom: 0; }
+    .alert-warn  { border-color: var(--warning); }
+    .alert-danger{ border-color: var(--danger); }
+    .alert-icon  { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+    .alert-title { font-size: 12px; font-weight: 600; margin-bottom: 2px; }
+    .alert-desc  { font-size: 11px; color: var(--muted); line-height: 1.4; }
+    .alert-time  { font-size: 10px; color: var(--muted); margin-top: 4px; font-family: monospace; }
+
+    /* Stats bar */
+    .stats-bar {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .stat-item {
+      text-align: center;
+      padding: 8px;
+      background: var(--panel2);
+      border-radius: 6px;
+    }
+    .stat-value { font-size: 20px; font-weight: 700; color: var(--accent2); }
+    .stat-label { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+
+    /* ── MAP ── */
+    #map {
+      flex: 1;
+      background: #1a2332;
+    }
+
+    /* Leaflet dark map tiles adjustment */
+    .leaflet-tile { filter: brightness(0.85) saturate(0.8) hue-rotate(180deg) invert(1); }
+    .leaflet-container { background: #0f172a; }
+
+    /* Custom markers */
+    .v-marker {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      border: 3px solid rgba(255,255,255,0.9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 800;
+      color: #fff;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.5);
+      transition: transform 0.3s ease;
+      cursor: pointer;
+      white-space: nowrap;
+      position: relative;
+    }
+    .v-marker::after {
+      content: '';
+      position: absolute;
+      bottom: -7px;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 5px solid transparent;
+    }
+
+    /* Leaflet popup dark theme */
+    .leaflet-popup-content-wrapper {
+      background: var(--panel);
+      color: var(--text);
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    }
+    .leaflet-popup-tip { background: var(--panel); }
+    .leaflet-popup-content { margin: 14px 16px; font-size: 13px; }
+    .popup-title { font-weight: 700; font-size: 14px; margin-bottom: 6px; }
+    .popup-row { display: flex; justify-content: space-between; gap: 16px; margin-top: 4px; font-size: 12px; }
+    .popup-label { color: var(--muted); }
+    .popup-val { font-weight: 600; font-family: monospace; }
+    .leaflet-popup-close-button { color: var(--muted) !important; }
+
+    /* ── SETTINGS DRAWER ── */
+    .drawer-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 2000;
+    }
+    .drawer-overlay.open { display: block; }
+    .drawer {
+      position: fixed;
+      right: -380px;
+      top: 0;
+      bottom: 0;
+      width: 360px;
+      background: var(--panel);
+      border-left: 1px solid var(--border);
+      z-index: 2001;
+      display: flex;
+      flex-direction: column;
+      transition: right 0.25s ease;
+      overflow-y: auto;
+    }
+    .drawer.open { right: 0; }
+    .drawer-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .drawer-title { font-size: 15px; font-weight: 700; }
+    .drawer-body { padding: 20px; flex: 1; }
+
+    .mode-toggle {
+      display: flex;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+    .mode-btn {
+      flex: 1;
+      padding: 8px;
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .mode-btn.active { background: var(--accent); color: #fff; }
+
+    .field-group { margin-bottom: 16px; }
+    .field-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+    .field-input {
+      width: 100%;
+      background: var(--panel2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-size: 13px;
+      padding: 8px 12px;
+      font-family: monospace;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .field-input:focus { border-color: var(--accent); }
+
+    .apply-btn {
+      width: 100%;
+      padding: 10px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.15s;
+      margin-top: 8px;
+    }
+    .apply-btn:hover { background: #2563eb; }
+
+    .info-box {
+      background: var(--panel2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.5;
+      margin-bottom: 16px;
+    }
+    .info-box strong { color: var(--text); }
+
+    /* Ticker at bottom */
+    .ticker {
+      font-size: 10px;
+      color: var(--muted);
+      padding: 6px 16px;
+      background: var(--panel);
+      border-top: 1px solid var(--border);
+      font-family: monospace;
+      flex-shrink: 0;
+    }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+      .sidebar { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div style="display:flex;align-items:center;gap:8px;">
+    <div class="pulse-dot"></div>
+    <h1>GPS Fleet <span>Tracking</span></h1>
+  </div>
+  <span id="modeBadge" class="badge badge-sim">Simulated</span>
+  <div class="header-spacer"></div>
+  <a href="https://github.com/okalangkenneth/GPSTracking" target="_blank" class="icon-btn" title="GitHub Repo">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.44 9.8 8.2 11.38.6.11.82-.26.82-.58v-2.03c-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.09-.75.08-.74.08-.74 1.2.09 1.84 1.24 1.84 1.24 1.07 1.83 2.81 1.3 3.5 1 .1-.78.42-1.3.76-1.6-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.13-.3-.54-1.52.12-3.18 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 0 1 3-.4c1.02 0 2.04.14 3 .4 2.28-1.55 3.29-1.23 3.29-1.23.66 1.66.25 2.88.12 3.18.77.84 1.24 1.91 1.24 3.22 0 4.61-2.81 5.63-5.48 5.92.43.37.81 1.1.81 2.22v3.29c0 .32.22.7.83.58C20.56 21.8 24 17.3 24 12c0-6.63-5.37-12-12-12z"/>
+    </svg>
+  </a>
+  <button class="icon-btn" id="settingsBtn" title="Settings">⚙</button>
+</header>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+
+    <!-- Stats -->
+    <div class="stats-bar">
+      <div class="stat-item">
+        <div class="stat-value" id="statTotal">4</div>
+        <div class="stat-label">Vehicles</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value" id="statMoving">3</div>
+        <div class="stat-label">Moving</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value" id="statAlerts">2</div>
+        <div class="stat-label">Alerts</div>
+      </div>
+    </div>
+
+    <!-- Fleet Status -->
+    <div class="section">
+      <div class="section-title">Fleet Status</div>
+      <div id="fleetList"></div>
+    </div>
+
+    <!-- Drivers -->
+    <div class="section">
+      <div class="section-title">Drivers</div>
+      <div id="driverList"></div>
+    </div>
+
+    <!-- Alerts -->
+    <div class="section">
+      <div class="section-title">Recent Alerts</div>
+      <div class="alert-row alert-warn">
+        <div class="alert-icon">⚠️</div>
+        <div>
+          <div class="alert-title">Speed Limit Exceeded</div>
+          <div class="alert-desc">Bengt / Benz — vehicle has exceeded the speed limit (67 km/h)</div>
+          <div class="alert-time" id="alertTime1"></div>
+        </div>
+      </div>
+      <div class="alert-row alert-danger">
+        <div class="alert-icon">🚫</div>
+        <div>
+          <div class="alert-title">Restricted Area Entry</div>
+          <div class="alert-desc">John / Toyota — vehicle has entered a restricted area</div>
+          <div class="alert-time" id="alertTime2"></div>
+        </div>
+      </div>
+    </div>
+
+  </aside>
+
+  <!-- MAP -->
+  <div id="map"></div>
+
+</div>
+
+<!-- TICKER -->
+<div class="ticker" id="ticker">Initialising simulation…</div>
+
+<!-- SETTINGS DRAWER -->
+<div class="drawer-overlay" id="drawerOverlay"></div>
+<div class="drawer" id="drawer">
+  <div class="drawer-header">
+    <span class="drawer-title">⚙ Settings</span>
+    <button class="icon-btn" id="closeDrawer" style="border:none;font-size:18px;">✕</button>
+  </div>
+  <div class="drawer-body">
+
+    <div class="field-group">
+      <div class="field-label">Data Mode</div>
+      <div class="mode-toggle">
+        <button class="mode-btn active" id="modeSimBtn">🎮 Simulated</button>
+        <button class="mode-btn" id="modeLocalBtn">🔌 Local API</button>
+      </div>
+    </div>
+
+    <div id="localFields" style="display:none;">
+      <div class="info-box">
+        <strong>Local API mode</strong> — enter the base URLs for your running services.
+        Start them with <code>docker compose up</code> and ensure CORS is open or use a
+        browser extension.
+      </div>
+      <div class="field-group">
+        <div class="field-label">GPSTrackings API</div>
+        <input class="field-input" id="urlGPS" value="http://localhost:17108" placeholder="http://localhost:17108" />
+      </div>
+      <div class="field-group">
+        <div class="field-label">Drivers API</div>
+        <input class="field-input" id="urlDrivers" value="http://localhost:32014" placeholder="http://localhost:32014" />
+      </div>
+      <div class="field-group">
+        <div class="field-label">Notifications API</div>
+        <input class="field-input" id="urlNotifications" value="http://localhost:51378" placeholder="http://localhost:51378" />
+      </div>
+      <div class="field-group">
+        <div class="field-label">Search API</div>
+        <input class="field-input" id="urlSearch" value="http://localhost:5010" placeholder="http://localhost:5010" />
+      </div>
+      <button class="apply-btn" id="applyLocal">Connect to Local APIs</button>
+    </div>
+
+    <div id="simInfo">
+      <div class="info-box">
+        <strong>Simulated mode</strong> — vehicles animate using the exact seed data from the
+        database. No backend needed. Switch to <em>Local API</em> mode to connect to running
+        services via Docker Compose.
+      </div>
+      <div class="info-box">
+        <strong>Seed data matches:</strong><br/>
+        <code>GPSTrackingsProvider.cs SeedData()</code><br/>
+        <code>DriversProvider.cs SeedData()</code>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ─────────────────────────────────────────────
+//  SEED DATA (matches DB providers exactly)
+// ─────────────────────────────────────────────
+const VEHICLES = [
+  { id: 1, name: 'Benz',   lat: 37.788022, lng: -122.399797, speed: 67,  color: '#ef4444', moving: true  },
+  { id: 2, name: 'Toyota', lat: 60.497872, lng:  -12.354600, speed: 0,   color: '#3b82f6', moving: false },
+  { id: 3, name: 'Lexus',  lat:  3.578686, lng:  -45.576800, speed: 5,   color: '#22c55e', moving: true  },
+  { id: 4, name: 'Opel',   lat: 10.678550, lng:   -1.399797, speed: 50,  color: '#f97316', moving: true  },
+];
+
+const DRIVERS = [
+  { id: 1, name: 'Bengt', license: '123456', vehicle: 'Benz'   },
+  { id: 2, name: 'John',  license: '475634', vehicle: 'Toyota' },
+  { id: 3, name: 'Peter', license: '487411', vehicle: 'Lexus'  },
+  { id: 4, name: 'Kacey', license: '687537', vehicle: 'Opel'   },
+];
+
+// Working copies that animate
+const state = VEHICLES.map(v => ({ ...v }));
+
+// ─────────────────────────────────────────────
+//  APP STATE
+// ─────────────────────────────────────────────
+let mode = 'sim'; // 'sim' | 'local'
+let apiUrls = {
+  gps:           'http://localhost:17108',
+  drivers:       'http://localhost:32014',
+  notifications: 'http://localhost:51378',
+  search:        'http://localhost:5010',
+};
+let animTimer = null;
+let activeVehicle = null;
+
+// ─────────────────────────────────────────────
+//  MAP INIT
+// ─────────────────────────────────────────────
+const map = L.map('map', {
+  center: [25, -40],
+  zoom: 2,
+  zoomControl: true,
+  attributionControl: true,
+});
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+  maxZoom: 18,
+}).addTo(map);
+
+// ─────────────────────────────────────────────
+//  MARKERS
+// ─────────────────────────────────────────────
+function makeIcon(v) {
+  const initial = v.name[0];
+  return L.divIcon({
+    className: '',
+    html: `<div class="v-marker" style="background:${v.color};">
+             ${initial}
+           </div>`,
+    iconSize: [28, 28],
+    iconAnchor: [14, 14],
+    popupAnchor: [0, -18],
+  });
+}
+
+function popupContent(v) {
+  const isMoving = v.moving && v.speed > 0;
+  const statusHtml = isMoving
+    ? '<span class="status-badge status-moving">Moving</span>'
+    : '<span class="status-badge status-stopped">Stopped</span>';
+  const driver = DRIVERS.find(d => d.vehicle === v.name);
+  return `
+    <div class="popup-title" style="color:${v.color}">${v.name}</div>
+    <div class="popup-row"><span class="popup-label">Driver</span><span class="popup-val">${driver ? driver.name : '—'}</span></div>
+    <div class="popup-row"><span class="popup-label">Latitude</span><span class="popup-val">${v.lat.toFixed(5)}</span></div>
+    <div class="popup-row"><span class="popup-label">Longitude</span><span class="popup-val">${v.lng.toFixed(5)}</span></div>
+    <div class="popup-row"><span class="popup-label">Speed</span><span class="popup-val">${v.speed} km/h</span></div>
+    <div class="popup-row" style="margin-top:8px"><span class="popup-label">Status</span>${statusHtml}</div>
+  `;
+}
+
+const markers = {};
+state.forEach(v => {
+  const m = L.marker([v.lat, v.lng], { icon: makeIcon(v) })
+    .addTo(map)
+    .bindPopup(popupContent(v), { maxWidth: 220 });
+
+  m.on('click', () => {
+    activeVehicle = v.id;
+    renderFleetList();
+  });
+
+  markers[v.id] = m;
+});
+
+// ─────────────────────────────────────────────
+//  SIDEBAR RENDERING
+// ─────────────────────────────────────────────
+function renderFleetList() {
+  const el = document.getElementById('fleetList');
+  el.innerHTML = state.map(v => {
+    const isMoving = v.moving && v.speed > 0;
+    const statusHtml = isMoving
+      ? '<span class="status-badge status-moving">Moving</span>'
+      : '<span class="status-badge status-stopped">Stopped</span>';
+    const isActive = activeVehicle === v.id;
+    return `
+      <div class="vehicle-card ${isActive ? 'active' : ''}" onclick="focusVehicle(${v.id})">
+        <div class="v-dot" style="background:${v.color}"></div>
+        <div class="v-info">
+          <div class="v-name">${v.name}</div>
+          <div class="v-coords">${v.lat.toFixed(4)}, ${v.lng.toFixed(4)}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+          <div class="v-speed" style="color:${v.color}">${v.speed} <span style="font-weight:400;font-size:10px;color:var(--muted)">km/h</span></div>
+          ${statusHtml}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderDriverList() {
+  const el = document.getElementById('driverList');
+  el.innerHTML = DRIVERS.map(d => {
+    const v = state.find(x => x.name === d.vehicle);
+    const color = v ? v.color : '#3b82f6';
+    return `
+      <div class="driver-row">
+        <div class="driver-avatar" style="background:${color}">${d.name[0]}</div>
+        <div>
+          <div class="driver-name">${d.name}</div>
+          <div class="driver-lic">Lic: ${d.license}</div>
+        </div>
+        <div class="driver-vehicle">
+          <div class="v-dot" style="background:${color};display:inline-block;vertical-align:middle;margin-right:4px;"></div>
+          ${d.vehicle}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderAlertTimes() {
+  const now = new Date();
+  const fmt = d => d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  document.getElementById('alertTime1').textContent = fmt(new Date(now - 4 * 60000));
+  document.getElementById('alertTime2').textContent = fmt(new Date(now - 11 * 60000));
+}
+
+function renderStats() {
+  const moving = state.filter(v => v.moving && v.speed > 0).length;
+  document.getElementById('statMoving').textContent = moving;
+}
+
+window.focusVehicle = function(id) {
+  const v = state.find(x => x.id === id);
+  if (!v) return;
+  activeVehicle = id;
+  map.flyTo([v.lat, v.lng], 6, { duration: 1.2 });
+  markers[id].openPopup();
+  renderFleetList();
+};
+
+// ─────────────────────────────────────────────
+//  SIMULATION ANIMATION
+// ─────────────────────────────────────────────
+let tick = 0;
+const directions = {}; // per-vehicle random walk direction
+state.forEach(v => {
+  directions[v.id] = { dlat: (Math.random() - 0.5) * 0.002, dlng: (Math.random() - 0.5) * 0.002 };
+});
+
+function animateTick() {
+  tick++;
+  // Occasionally change direction
+  state.forEach(v => {
+    if (!v.moving || v.speed === 0) return;
+    if (Math.random() < 0.2) {
+      directions[v.id] = {
+        dlat: (Math.random() - 0.5) * 0.002 * (v.speed / 30),
+        dlng: (Math.random() - 0.5) * 0.002 * (v.speed / 30),
+      };
+    }
+    const d = directions[v.id];
+    v.lat += d.dlat;
+    v.lng += d.dlng;
+
+    // Vary speed slightly
+    v.speed = Math.max(1, v.speed + Math.round((Math.random() - 0.5) * 4));
+  });
+
+  updateMarkersAndUI();
+}
+
+function updateMarkersAndUI() {
+  state.forEach(v => {
+    const m = markers[v.id];
+    m.setLatLng([v.lat, v.lng]);
+    m.setIcon(makeIcon(v));
+    if (m.isPopupOpen()) {
+      m.setPopupContent(popupContent(v));
+    }
+  });
+  renderFleetList();
+  renderStats();
+  updateTicker();
+}
+
+function updateTicker() {
+  const moving = state.filter(v => v.moving && v.speed > 0);
+  const parts = moving.map(v => `${v.name} ${v.speed}km/h`).join('  ·  ');
+  const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  document.getElementById('ticker').textContent =
+    `[${now}]  LIVE TELEMETRY  ·  ${parts}  ·  Tick #${tick}`;
+}
+
+function startSimulation() {
+  stopSimulation();
+  animTimer = setInterval(animateTick, 3000);
+}
+
+function stopSimulation() {
+  if (animTimer) { clearInterval(animTimer); animTimer = null; }
+}
+
+// ─────────────────────────────────────────────
+//  LOCAL API MODE
+// ─────────────────────────────────────────────
+async function fetchLocalData() {
+  document.getElementById('ticker').textContent = 'Connecting to local APIs…';
+  try {
+    const [gpsRes, driversRes] = await Promise.all([
+      fetch(`${apiUrls.gps}/api/gPSTrackings`),
+      fetch(`${apiUrls.drivers}/api/drivers`),
+    ]);
+
+    if (gpsRes.ok) {
+      const gpsData = await gpsRes.json();
+      gpsData.forEach(g => {
+        const v = state.find(x => x.id === g.id);
+        if (v) {
+          v.lat = g.latitude;
+          v.lng = g.longitude;
+          v.speed = g.speed;
+          v.name = g.vehicle;
+          v.moving = g.speed > 0;
+        }
+      });
+    }
+
+    updateMarkersAndUI();
+    document.getElementById('ticker').textContent =
+      `Connected to local APIs — GPS: ${apiUrls.gps} · Drivers: ${apiUrls.drivers}`;
+  } catch (e) {
+    document.getElementById('ticker').textContent =
+      `⚠ Could not reach local APIs (${e.message}). Falling back to simulated mode.`;
+    setMode('sim');
+  }
+}
+
+// ─────────────────────────────────────────────
+//  MODE SWITCHING
+// ─────────────────────────────────────────────
+function setMode(m) {
+  mode = m;
+  const badge = document.getElementById('modeBadge');
+  const simBtn = document.getElementById('modeSimBtn');
+  const localBtn = document.getElementById('modeLocalBtn');
+  const localFields = document.getElementById('localFields');
+  const simInfo = document.getElementById('simInfo');
+
+  if (m === 'sim') {
+    badge.textContent = 'Simulated';
+    badge.className = 'badge badge-sim';
+    simBtn.classList.add('active');
+    localBtn.classList.remove('active');
+    localFields.style.display = 'none';
+    simInfo.style.display = '';
+    startSimulation();
+  } else {
+    badge.textContent = 'Local API';
+    badge.className = 'badge badge-live';
+    localBtn.classList.add('active');
+    simBtn.classList.remove('active');
+    localFields.style.display = '';
+    simInfo.style.display = 'none';
+    stopSimulation();
+    fetchLocalData();
+    animTimer = setInterval(fetchLocalData, 5000);
+  }
+}
+
+// ─────────────────────────────────────────────
+//  SETTINGS DRAWER
+// ─────────────────────────────────────────────
+function openDrawer() {
+  document.getElementById('drawer').classList.add('open');
+  document.getElementById('drawerOverlay').classList.add('open');
+}
+function closeDrawer() {
+  document.getElementById('drawer').classList.remove('open');
+  document.getElementById('drawerOverlay').classList.remove('open');
+}
+
+document.getElementById('settingsBtn').addEventListener('click', openDrawer);
+document.getElementById('closeDrawer').addEventListener('click', closeDrawer);
+document.getElementById('drawerOverlay').addEventListener('click', closeDrawer);
+
+document.getElementById('modeSimBtn').addEventListener('click', () => setMode('sim'));
+document.getElementById('modeLocalBtn').addEventListener('click', () => {
+  document.getElementById('localFields').style.display = '';
+  document.getElementById('simInfo').style.display = 'none';
+  document.getElementById('modeLocalBtn').classList.add('active');
+  document.getElementById('modeSimBtn').classList.remove('active');
+});
+
+document.getElementById('applyLocal').addEventListener('click', () => {
+  apiUrls.gps           = document.getElementById('urlGPS').value.trim().replace(/\/$/, '');
+  apiUrls.drivers       = document.getElementById('urlDrivers').value.trim().replace(/\/$/, '');
+  apiUrls.notifications = document.getElementById('urlNotifications').value.trim().replace(/\/$/, '');
+  apiUrls.search        = document.getElementById('urlSearch').value.trim().replace(/\/$/, '');
+  closeDrawer();
+  setMode('local');
+});
+
+// ─────────────────────────────────────────────
+//  BOOT
+// ─────────────────────────────────────────────
+renderFleetList();
+renderDriverList();
+renderAlertTimes();
+renderStats();
+startSimulation();
+
+// Trigger first tick immediately for visual confirmation
+setTimeout(() => {
+  animateTick();
+  document.getElementById('ticker').textContent = 'Simulation active — 4 vehicles tracked';
+}, 500);
+</script>
+</body>
+</html>
