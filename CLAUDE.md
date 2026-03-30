@@ -41,7 +41,7 @@ Before making any changes, capture the current broken state.
 |-------|-------|
 | Last known clean build | 2026-03-30 |
 | Build command | `dotnet build GPSTracking.sln` |
-| Last run by Claude | 2026-03-30 (BUG-001–005 fixed) |
+| Last run by Claude | 2026-03-30 (net8.0 upgrade TD-002) |
 
 ### Current Build Errors
 ```
@@ -50,10 +50,7 @@ None — Build succeeded (0 errors)
 
 ### Current Warnings
 ```
-[pre-existing] NETSDK1138 (×8): Target framework 'netcoreapp3.1' is out of support.
-               Affects all 4 service projects + tests project.
-
-[resolved]     CS1717 SearchService.cs — eliminated by BUG-003 fix (constructor param renamed)
+None — 0 warnings (NETSDK1138 ×8 eliminated by net8.0 upgrade; CS1717 eliminated by BUG-003 fix)
 ```
 
 ### Services Verified Building
@@ -101,7 +98,7 @@ git blame path/to/file
 | ID | Location | Description | Severity | Safe to touch? |
 |----|----------|-------------|----------|----------------|
 | TD-001 | All services | EF Core InMemory database — data lost on restart, no real persistence | High | Ask first |
-| TD-002 | All .csproj files | `netcoreapp3.1` is EOL (end of support since Dec 2022) — no security updates | High | Ask first |
+| TD-002 | All .csproj files | `netcoreapp3.1` is EOL (end of support since Dec 2022) — no security updates | High | ✅ Done (upgraded to net8.0 2026-03-30) |
 | TD-003 | `GPSTracking.Api.Payments/` | Folder named "Payments" contains the "Notifications" project — misleading name | Med | Yes |
 | TD-004 | `GPSTracking.Api.GPSTracking/` | Orphaned folder not in solution — contains Db classes only, no csproj registered | Med | Ask first |
 | TD-005 | `SearchService.cs`, `DriversService.cs` | `dynamic` return types in Search service — no compile-time type safety | Med | Ask first |
@@ -143,6 +140,7 @@ git blame path/to/file
 - Fix BUG-003: `SearchService` constructor — renamed param `gPSTrakingsService` → `gPSTrackingsService` ✅ 2026-03-30
 - Fix BUG-004: `GPSTrackingsService` — HttpClient name `" GPSTrackinsService "` → `"GPSTrackingsService"` ✅ 2026-03-30
 - Fix BUG-005: `NotificationsService` — HttpClient name `" NotificationsService "` → `"NotificationsService"` ✅ 2026-03-30
+- Upgrade all 5 projects from netcoreapp3.1 to net8.0 (TD-002) ✅ 2026-03-30
 
 ### 🔨 IN PROGRESS
 <!-- Nothing currently in progress -->
@@ -155,7 +153,6 @@ git blame path/to/file
 - POST/PUT/DELETE endpoints for all CRUD services
 - Real database (SQL Server or PostgreSQL) to replace InMemory
 - Authentication/Authorization
-- Upgrade from EOL netcoreapp3.1 to .NET 8+
 - Resolve orphaned folder `GPSTracking.Api.GPSTracking/` (add to solution or delete)
 - Rename folder `GPSTracking.Api.Payments/` → `GPSTracking.Api.Notifications/`
 
@@ -163,12 +160,12 @@ git blame path/to/file
 
 ## Tech Stack
 
-- **Runtime**: .NET Core 3.1 (⚠️ EOL — upgrade target: .NET 8)
-- **Framework**: ASP.NET Core 3.1
-- **Database**: EF Core 3.1.0 with InMemory provider (no real DB yet)
-- **ORM**: Entity Framework Core 3.1.0
-- **Mapping**: AutoMapper 7.0.0 (`AutoMapper.Extensions.Microsoft.DependencyInjection`)
-- **Testing**: xUnit 2.4.0, coverlet.collector 1.2.0
+- **Runtime**: .NET 8
+- **Framework**: ASP.NET Core 8
+- **Database**: EF Core 8.0.11 with InMemory provider (no real DB yet)
+- **ORM**: Entity Framework Core 8.0.11
+- **Mapping**: AutoMapper 12.0.1 (`AutoMapper.Extensions.Microsoft.DependencyInjection`)
+- **Testing**: xUnit 2.9.2, coverlet.collector 6.0.2
 - **Package Manager**: NuGet
 - **Infrastructure**: Docker Compose (Windows containers, `DockerDefaultTargetOS=Windows`)
 - **Inter-service communication**: `IHttpClientFactory` with named clients
