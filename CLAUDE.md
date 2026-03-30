@@ -41,7 +41,7 @@ Before making any changes, capture the current broken state.
 |-------|-------|
 | Last known clean build | 2026-03-30 |
 | Build command | `dotnet build GPSTracking.sln` |
-| Last run by Claude | 2026-03-30 (TD-001: PostgreSQL migration) |
+| Last run by Claude | 2026-03-30 (Phase 5: README + GitHub Pages demo) |
 
 ### Current Build Errors
 ```
@@ -144,6 +144,8 @@ git blame path/to/file
 - Fix BUG-004: `GPSTrackingsService` — HttpClient name `" GPSTrackinsService "` → `"GPSTrackingsService"` ✅ 2026-03-30
 - Fix BUG-005: `NotificationsService` — HttpClient name `" NotificationsService "` → `"NotificationsService"` ✅ 2026-03-30
 - Upgrade all 5 projects from netcoreapp3.1 to net8.0 (TD-002) ✅ 2026-03-30
+- README.md: architecture diagram, tech stack, quick-start, API reference ✅ 2026-03-30
+- GitHub Pages demo (`docs/index.html`): Leaflet map, 4 animated vehicles, dark UI, settings drawer ✅ 2026-03-30
 
 ### 🔨 IN PROGRESS
 <!-- Nothing currently in progress -->
