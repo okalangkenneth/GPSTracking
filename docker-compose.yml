@@ -13,3 +13,17 @@ services:
       context: .
       dockerfile: GPSTracking.Api.Drivers\Dockerfile
 
+  gpstracking.api.notifications:
+    image: ${DOCKER_REGISTRY-}gpstrackingapinotifications
+    build:
+      context: .
+      dockerfile: GPSTracking.Api.Payments\Dockerfile
+
+  gpstracking.api.search:
+    image: ${DOCKER_REGISTRY-}gpstrackingapisearch
+    build:
+      context: .
+      dockerfile: GPSTracking.Api.Search\Dockerfile
+    depends_on:
+      - gpstracking.api.gpstrackings
+      - gpstracking.api.drivers
