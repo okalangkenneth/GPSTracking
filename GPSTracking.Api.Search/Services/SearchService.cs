@@ -11,7 +11,7 @@ namespace GPSTracking.Api.Search.Services
         private readonly IGPSTrackingsService gPSTrackingsService;
 
         public SearchService(INotificationsService notificationsService,
-            IGPSTrackingsService gPSTrakingsService, IDriversService driversService)
+            IGPSTrackingsService gPSTrackingsService, IDriversService driversService)
         {
             this.notificationsService = notificationsService;
             this.gPSTrackingsService = gPSTrackingsService;

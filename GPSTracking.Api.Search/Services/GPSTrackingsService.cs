@@ -27,7 +27,7 @@ namespace GPSTracking.Api.Search.Services
         {
             try
             {
-                var client = httpClientFactory.CreateClient(" GPSTrackinsService ");
+                var client = httpClientFactory.CreateClient("GPSTrackingsService");
                 var response = await client.GetAsync("api/gPSTrackings");
                 if (response.IsSuccessStatusCode)
                 {

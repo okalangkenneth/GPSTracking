@@ -27,14 +27,14 @@ namespace GPSTracking.Api.Search.Services
 
             try
             {
-                var client = httpClientFactory.CreateClient(" NotificationsService ");
+                var client = httpClientFactory.CreateClient("NotificationsService");
                 var response = await client.GetAsync( $"api/notifications/{driverId}");
                 if (response.IsSuccessStatusCode)
                 {
                     var content = await response.Content.ReadAsByteArrayAsync();
                     var options = new JsonSerializerOptions() { PropertyNameCaseInsensitive = true };
                     var result = JsonSerializer.Deserialize<IEnumerable<Notification>>(content,options);
-                    return (false, result,null);
+                    return (true, result,null);
                 }
                 return (false, null, response.ReasonPhrase);
                 

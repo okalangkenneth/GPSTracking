@@ -32,7 +32,7 @@ namespace GPSTracking.Api.Search.Services
                     var content = await response.Content.ReadAsByteArrayAsync();
                     var options = new JsonSerializerOptions() { PropertyNameCaseInsensitive = true };
                     var result = JsonSerializer.Deserialize<dynamic>(content, options);
-                    return (false, result, null);
+                    return (true, result, null);
                 }
                 return (false, null, response.ReasonPhrase);
 
