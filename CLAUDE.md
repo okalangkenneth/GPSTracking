@@ -41,7 +41,7 @@ Before making any changes, capture the current broken state.
 |-------|-------|
 | Last known clean build | 2026-03-30 |
 | Build command | `dotnet build GPSTracking.sln` |
-| Last run by Claude | 2026-03-30 (TD-007 + TD-008: Swagger + Docker) |
+| Last run by Claude | 2026-03-30 (TD-001: PostgreSQL migration) |
 
 ### Current Build Errors
 ```
@@ -97,7 +97,7 @@ git blame path/to/file
 
 | ID | Location | Description | Severity | Safe to touch? |
 |----|----------|-------------|----------|----------------|
-| TD-001 | All services | EF Core InMemory database — data lost on restart, no real persistence | High | Ask first |
+| TD-001 | All services | EF Core InMemory database — data lost on restart, no real persistence | High | ✅ Done (PostgreSQL via Npgsql 8.0.11, migrations added 2026-03-30) |
 | TD-002 | All .csproj files | `netcoreapp3.1` is EOL (end of support since Dec 2022) — no security updates | High | ✅ Done (upgraded to net8.0 2026-03-30) |
 | TD-003 | `GPSTracking.Api.Payments/` | Folder named "Payments" contains the "Notifications" project — misleading name | Med | Yes |
 | TD-004 | `GPSTracking.Api.GPSTracking/` | Orphaned folder not in solution — contains Db classes only, no csproj registered | Med | Ask first |
@@ -133,7 +133,9 @@ git blame path/to/file
 - `GPSTracking.Api.Search` — POST /api/search (end-to-end wired and functional)
 - xUnit tests for GPSTrackings (3 tests: GetAll, GetById valid, GetById invalid)
 - AutoMapper profiles for Drivers and GPSTrackings
-- EF Core InMemory seed data for Drivers and GPSTrackings
+- EF Core InMemory seed data for Drivers and GPSTrackings (seed data removed from services; InMemory kept in Tests project)
+- PostgreSQL via Npgsql 8.0.11; InitialCreate migrations for Drivers, GPSTrackings, Notifications; auto-migrate at startup (TD-001) ✅ 2026-03-30
+- docker-compose.override.yml: postgres:16 service, env-var connection strings, port mappings for all 4 services ✅ 2026-03-30
 - Docker support: Dockerfiles for all 4 services; all 4 in docker-compose.yml (TD-007) ✅ 2026-03-30
 - Swagger/OpenAPI via Swashbuckle 6.9.0 on all 4 services (TD-008) ✅ 2026-03-30
 - Fix BUG-001: `DriversService.GetDriverAsync` — `(false, result, null)` → `(true, result, null)` ✅ 2026-03-30
@@ -149,7 +151,6 @@ git blame path/to/file
 ### ❌ REMAINING
 - Add tests for Drivers, Notifications, Search services
 - POST/PUT/DELETE endpoints for all CRUD services
-- Real database (SQL Server or PostgreSQL) to replace InMemory
 - Authentication/Authorization
 - Resolve orphaned folder `GPSTracking.Api.GPSTracking/` (add to solution or delete)
 - Rename folder `GPSTracking.Api.Payments/` → `GPSTracking.Api.Notifications/`
@@ -160,7 +161,7 @@ git blame path/to/file
 
 - **Runtime**: .NET 8
 - **Framework**: ASP.NET Core 8
-- **Database**: EF Core 8.0.11 with InMemory provider (no real DB yet)
+- **Database**: PostgreSQL 16 via Npgsql.EntityFrameworkCore.PostgreSQL 8.0.11
 - **ORM**: Entity Framework Core 8.0.11
 - **Mapping**: AutoMapper 12.0.1 (`AutoMapper.Extensions.Microsoft.DependencyInjection`)
 - **Testing**: xUnit 2.9.2, coverlet.collector 6.0.2
@@ -286,6 +287,6 @@ Update the Build State, Build Progress, and any new Technical Debt or Bug Regist
 **Repo**: https://github.com/okalangkenneth/GPSTracking
 
 ### Rules
-- Commit and push at the end of **every phase**, not just when done
+- Commit AND push (`git push origin master`) at the end of **every prompt**, not just when done
 - Keep commit messages descriptive
 - Never push `.env` or `.env.local`
