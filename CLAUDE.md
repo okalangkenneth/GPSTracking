@@ -41,7 +41,7 @@ Before making any changes, capture the current broken state.
 |-------|-------|
 | Last known clean build | 2026-03-30 |
 | Build command | `dotnet build GPSTracking.sln` |
-| Last run by Claude | 2026-03-30 (net8.0 upgrade TD-002) |
+| Last run by Claude | 2026-03-30 (TD-007 + TD-008: Swagger + Docker) |
 
 ### Current Build Errors
 ```
@@ -103,8 +103,8 @@ git blame path/to/file
 | TD-004 | `GPSTracking.Api.GPSTracking/` | Orphaned folder not in solution — contains Db classes only, no csproj registered | Med | Ask first |
 | TD-005 | `SearchService.cs`, `DriversService.cs` | `dynamic` return types in Search service — no compile-time type safety | Med | Ask first |
 | TD-006 | Entire solution | Only 3 xUnit tests (all for GPSTrackings) — zero coverage for Drivers, Notifications, Search | Med | Yes |
-| TD-007 | `docker-compose.yml` | Only 2 of 4 services in Docker Compose (missing Notifications and Search) | Med | Yes |
-| TD-008 | All services | No Swagger/OpenAPI documentation | Low | Yes |
+| TD-007 | `docker-compose.yml` | Only 2 of 4 services in Docker Compose (missing Notifications and Search) | Med | ✅ Done (all 4 services added 2026-03-30) |
+| TD-008 | All services | No Swagger/OpenAPI documentation | Low | ✅ Done (Swashbuckle 6.9.0 added to all 4 services 2026-03-30) |
 | TD-009 | All services | No authentication or authorization on any endpoint | High | Ask first |
 | TD-010 | All services | No HTTPS / HSTS configured | Med | Ask first |
 
@@ -134,7 +134,8 @@ git blame path/to/file
 - xUnit tests for GPSTrackings (3 tests: GetAll, GetById valid, GetById invalid)
 - AutoMapper profiles for Drivers and GPSTrackings
 - EF Core InMemory seed data for Drivers and GPSTrackings
-- Docker support: Dockerfiles for Drivers and GPSTrackings
+- Docker support: Dockerfiles for all 4 services; all 4 in docker-compose.yml (TD-007) ✅ 2026-03-30
+- Swagger/OpenAPI via Swashbuckle 6.9.0 on all 4 services (TD-008) ✅ 2026-03-30
 - Fix BUG-001: `DriversService.GetDriverAsync` — `(false, result, null)` → `(true, result, null)` ✅ 2026-03-30
 - Fix BUG-002: `NotificationsService.GetNotificationsAsync` — `(false, result, null)` → `(true, result, null)` ✅ 2026-03-30
 - Fix BUG-003: `SearchService` constructor — renamed param `gPSTrakingsService` → `gPSTrackingsService` ✅ 2026-03-30
@@ -146,9 +147,6 @@ git blame path/to/file
 <!-- Nothing currently in progress -->
 
 ### ❌ REMAINING
-- Add Dockerfiles for Notifications and Search services
-- Add Notifications and Search to docker-compose.yml
-- Add Swagger/OpenAPI (Swashbuckle)
 - Add tests for Drivers, Notifications, Search services
 - POST/PUT/DELETE endpoints for all CRUD services
 - Real database (SQL Server or PostgreSQL) to replace InMemory
@@ -167,7 +165,8 @@ git blame path/to/file
 - **Mapping**: AutoMapper 12.0.1 (`AutoMapper.Extensions.Microsoft.DependencyInjection`)
 - **Testing**: xUnit 2.9.2, coverlet.collector 6.0.2
 - **Package Manager**: NuGet
-- **Infrastructure**: Docker Compose (Windows containers, `DockerDefaultTargetOS=Windows`)
+- **API Docs**: Swashbuckle.AspNetCore 6.9.0 (Swagger UI at `/swagger` in Development)
+- **Infrastructure**: Docker Compose (Windows containers, `DockerDefaultTargetOS=Windows`); all 4 services
 - **Inter-service communication**: `IHttpClientFactory` with named clients
 - **Memory**: Native auto-memory + claude-mem for deep history
 
