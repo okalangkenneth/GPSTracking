@@ -27,3 +27,6 @@ services:
     depends_on:
       - gpstracking.api.gpstrackings
       - gpstracking.api.drivers
+
+volumes:
+  postgres_data:

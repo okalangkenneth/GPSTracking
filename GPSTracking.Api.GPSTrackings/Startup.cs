@@ -5,6 +5,7 @@ using GPSTracking.Api.GPSTrackings.Providers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
+using Npgsql.EntityFrameworkCore.PostgreSQL;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -29,7 +30,7 @@ namespace GPSTracking.Api.GPSTrackings
             services.AddDbContext<GPSTrackingsDbContext>(options =>
 
             {
-              options.UseInMemoryDatabase("GPSTrackings");
+              options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection"));
             });
 
             services.AddControllers();

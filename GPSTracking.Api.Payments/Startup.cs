@@ -5,6 +5,7 @@ using GPSTracking.Api.Notifications.Providers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
+using Npgsql.EntityFrameworkCore.PostgreSQL;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -28,7 +29,7 @@ namespace GPSTracking.Api.Notifications
             services.AddDbContext<NotificationsDbContext>(options =>
 
             {
-                options.UseInMemoryDatabase("Notifications");
+                options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection"));
             });
 
 

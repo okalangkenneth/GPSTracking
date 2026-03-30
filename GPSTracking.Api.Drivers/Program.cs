@@ -1,7 +1,17 @@
+using GPSTracking.Api.Drivers.Db;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-Host.CreateDefaultBuilder(args)
+var host = Host.CreateDefaultBuilder(args)
     .ConfigureWebHostDefaults(webBuilder => webBuilder.UseStartup<GPSTracking.Api.Drivers.Startup>())
-    .Build()
-    .Run();
+    .Build();
+
+using (var scope = host.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<DriversDbContext>();
+    db.Database.Migrate();
+}
+
+host.Run();

@@ -1,15 +1,55 @@
 version: '3.4'
 
 services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
   gpstracking.api.gpstrackings:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=gps_trackings;Username=postgres;Password=postgres
     ports:
-      - "80"
+      - "17108:80"
+    depends_on:
+      - postgres
 
   gpstracking.api.drivers:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=gps_drivers;Username=postgres;Password=postgres
     ports:
-      - "80"
+      - "32014:80"
+    depends_on:
+      - postgres
 
+  gpstracking.api.notifications:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=gps_notifications;Username=postgres;Password=postgres
+    ports:
+      - "51378:80"
+    depends_on:
+      - postgres
+
+  gpstracking.api.search:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - Services__Drivers=http://gpstracking.api.drivers:80
+      - Services__GPSTrackings=http://gpstracking.api.gpstrackings:80
+      - Services__Notifications=http://gpstracking.api.notifications:80
+    ports:
+      - "5010:80"
+    depends_on:
+      - gpstracking.api.gpstrackings
+      - gpstracking.api.drivers
+      - gpstracking.api.notifications
+
+volumes:
+  postgres_data:
